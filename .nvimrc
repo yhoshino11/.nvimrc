@@ -41,7 +41,6 @@ let g:lightline = {
       \ },
       \ 'component_function': {
       \   'fugitive': 'MyFugitive',
-      \   'readonly': 'MyReadonly',
       \   'filename': 'MyFilename',
       \   'fileformat': 'MyFileformat',
       \   'filetype': 'MyFiletype',
@@ -55,7 +54,7 @@ let g:lightline = {
       \ 'component_type': {
       \   'syntastic': 'error',
       \ },
-      \ 'separator': { 'left': '⮀', 'right': '⮂' },
+      \ 'separator':    { 'left': '⮀', 'right': '⮂' },
       \ 'subseparator': { 'left': '⮁', 'right': '⮃' }
       \ }
 
@@ -63,20 +62,11 @@ function! MyModified()
   return &ft =~ 'help' ? '' : &modified ? '+' : &modifiable ? '' : '-'
 endfunction
 
-function! MyReadonly()
-  if &filetype == "help"
-    return "" elseif &readonly
-    return "⭤"
-  else
-    return ""
-  endif
-endfunction
-
 function! MyFugitive()
   try
     if expand('%:t') !~? 'Tagbar\|Gundo\|NERD' && &ft !~? 'vimfiler' && exists('*fugitive#head')
       let mark = '⭠ '  " edit here for cool mark
-      let _ = fugitive#head()
+      let _    = fugitive#head()
       return strlen(_) ? mark._ : ''
     endif
   catch
@@ -89,11 +79,10 @@ function! MyFilename()
   return fname == 'ControlP' ? g:lightline.ctrlp_item :
         \ fname == '__Tagbar__' ? g:lightline.fname :
         \ fname =~ '__Gundo\|NERD_tree' ? '' :
-        \ &ft == 'unite' ? unite#get_status_string() :
-        \ &ft == 'vimshell' ? vimshell#get_status_string() :
-        \ ('' != MyReadonly() ? MyReadonly() . ' ' : '') .
-        \ ('' != fname ? fname : '[No Name]') .
-        \ ('' != MyModified() ? ' ' . MyModified() : '')
+        \ &ft   == 'unite' ? unite#get_status_string() :
+        \ &ft   == 'vimshell' ? b:vimshell.current_dir :
+        \ (''   != fname ? fname : '[No Name]') .
+        \ (''   != MyModified() ? ' ' . MyModified() : '')
 endfunction
 
 function! MyFileformat()
@@ -115,8 +104,8 @@ function! MyMode()
         \ fname == '__Gundo__' ? 'Gundo' :
         \ fname == '__Gundo_Preview__' ? 'Gundo Preview' :
         \ fname =~ 'NERD_tree' ? 'NERDTree' :
-        \ &ft == 'unite' ? 'Unite' :
-        \ &ft == 'vimshell' ? 'VimShell' :
+        \ &ft   == 'unite' ? 'Unite' :
+        \ &ft   == 'vimshell' ? 'VimShell' :
         \ winwidth(0) > 60 ? lightline#mode() : ''
 endfunction
 
@@ -137,9 +126,9 @@ let g:ctrlp_status_func = {
 
 function! CtrlPStatusFunc_1(focus, byfname, regex, prev, item, next, marked)
   let g:lightline.ctrlp_regex = a:regex
-  let g:lightline.ctrlp_prev = a:prev
-  let g:lightline.ctrlp_item = a:item
-  let g:lightline.ctrlp_next = a:next
+  let g:lightline.ctrlp_prev  = a:prev
+  let g:lightline.ctrlp_item  = a:item
+  let g:lightline.ctrlp_next  = a:next
   return lightline#statusline(0)
 endfunction
 
@@ -156,14 +145,15 @@ endfunction
 
 augroup AutoSyntastic
   autocmd!
-  autocmd BufWritePost *.c,*.cpp call s:syntastic()
+  autocmd BufWritePost * call s:syntastic()
 augroup END
+
 function! s:syntastic()
   SyntasticCheck
   call lightline#update()
 endfunction
 
-let g:unite_force_overwrite_statusline = 0
+let g:unite_force_overwrite_statusline    = 0
 let g:vimshell_force_overwrite_statusline = 0
 
 if !has('gui_running')
@@ -189,8 +179,8 @@ NeoBundle 'Shougo/unite.vim'
 let g:unite_enable_start_insert = 0
 
 " 大文字小文字を区別しない
-let g:unite_enable_ignore_case = 1
-let g:unite_enable_smart_case = 1
+let g:unite_enable_ignore_case  = 1
+let g:unite_enable_smart_case   = 1
 
 " grep検索
 nnoremap <silent> ,a  :<C-u>Unite grep:. -buffer-name=search-buffer<CR>
@@ -203,8 +193,8 @@ nnoremap <silent> ,r  :<C-u>UniteResume search-buffer<CR>
 
 " unite grep に ag(The Silver Searcher) を使う
 if executable('ag')
-  let g:unite_source_grep_command = 'ag'
-  let g:unite_source_grep_default_opts = '--nogroup --nocolor --column'
+  let g:unite_source_grep_command       = 'ag'
+  let g:unite_source_grep_default_opts  = '--nogroup --nocolor --column'
   let g:unite_source_grep_recursive_opt = ''
 endif
 
@@ -232,6 +222,17 @@ NeoBundle 'Shougo/vimshell', { 'rev' : '3787e5' }
 
 " Syntastic
 NeoBundle 'scrooloose/syntastic'
+set statusline+=%#warningmsg#
+set statusline+=%{SyntasticStatuslineFlag()}
+set statusline+=%*
+
+let g:syntastic_always_populate_loc_list = 1
+let g:syntastic_auto_loc_list            = 1
+let g:syntastic_check_on_open            = 1
+let g:syntastic_check_on_wq              = 1
+let g:syntastic_mode_map                 = { 'mode': 'passive', 'active_filetypes': ['ruby']}
+let g:syntastic_ruby_checkers            = ['rubocop']
+let g:syntastic_ruby_rubocop_exec        = '$HOME/.rbenv/shims/rubocop'
 
 " NeoSnippet
 NeoBundle 'Shougo/neosnippet.vim'
@@ -274,7 +275,7 @@ let g:neocomplcache_enable_at_startup = 1
 " Use smartcase.
 let g:neocomplcache_enable_smart_case = 1
 " Set minimum syntax keyword length.
-let g:neocomplcache_min_syntax_length = 3
+let g:neocomplcache_min_syntax_length        = 3
 let g:neocomplcache_lock_buffer_name_pattern = '\*ku\*'
 
 " Enable heavy features.
@@ -311,8 +312,8 @@ endfunction
 " <TAB>: completion.
 inoremap <expr><TAB>  pumvisible() ? "\<C-n>" : "\<TAB>"
 " <C-h>, <BS>: close popup and delete backword char.
-inoremap <expr><C-h> neocomplcache#smart_close_popup()."\<C-h>"
-inoremap <expr><BS> neocomplcache#smart_close_popup()."\<C-h>"
+inoremap <expr><C-h>  neocomplcache#smart_close_popup()."\<C-h>"
+inoremap <expr><BS>   neocomplcache#smart_close_popup()."\<C-h>"
 inoremap <expr><C-y>  neocomplcache#close_popup()
 inoremap <expr><C-e>  neocomplcache#cancel_popup()
 " Close popup by <Space>.
@@ -338,18 +339,18 @@ inoremap <expr><C-e>  neocomplcache#cancel_popup()
 "inoremap <expr><TAB>  pumvisible() ? "\<Down>" : "\<C-x>\<C-u>"
 
 " Enable omni completion.
-autocmd FileType css setlocal omnifunc=csscomplete#CompleteCSS
+autocmd FileType css           setlocal omnifunc=csscomplete#CompleteCSS
 autocmd FileType html,markdown setlocal omnifunc=htmlcomplete#CompleteTags
-autocmd FileType javascript setlocal omnifunc=javascriptcomplete#CompleteJS
-autocmd FileType python setlocal omnifunc=pythoncomplete#Complete
-autocmd FileType xml setlocal omnifunc=xmlcomplete#CompleteTags
+autocmd FileType javascript    setlocal omnifunc=javascriptcomplete#CompleteJS
+autocmd FileType python        setlocal omnifunc=pythoncomplete#Complete
+autocmd FileType xml           setlocal omnifunc=xmlcomplete#CompleteTags
 
 " Enable heavy omni completion.
 if !exists('g:neocomplcache_force_omni_patterns')
   let g:neocomplcache_force_omni_patterns = {}
 endif
 let g:neocomplcache_force_omni_patterns.php = '[^. \t]->\h\w*\|\h\w*::'
-let g:neocomplcache_force_omni_patterns.c = '[^.[:digit:] *\t]\%(\.\|->\)'
+let g:neocomplcache_force_omni_patterns.c   = '[^.[:digit:] *\t]\%(\.\|->\)'
 let g:neocomplcache_force_omni_patterns.cpp = '[^.[:digit:] *\t]\%(\.\|->\)\|\h\w*::'
 
 " For perlomni.vim setting.
@@ -381,19 +382,8 @@ nmap <Leader>a= :Tabularize /=<CR>
 vmap <Leader>a= :Tabularize /=<CR>
 nmap <Leader>a: :Tabularize /:\zs<CR>
 vmap <Leader>a: :Tabularize /:\zs<CR>
-
-" Syntastic
-NeoBundle 'scrooloose/syntastic'
-set statusline+=%#warningmsg#
-set statusline+=%{SyntasticStatuslineFlag()}
-set statusline+=%*
-
-let g:syntastic_always_populate_loc_list = 1
-let g:syntastic_auto_loc_list = 1
-let g:syntastic_check_on_open = 1
-let g:syntastic_check_on_wq = 1
-let g:syntastic_mode_map = { 'mode': 'passive', 'active_filetypes': ['ruby']}
-let g:syntastic_ruby_checkers = ['rubocop']
+nmap <Leader>a{ :Tabularize /{<CR>
+vmap <Leader>a{ :Tabularize /{<CR>
 
 " Multiple-Cursors
 NeoBundle 'terryma/vim-multiple-cursors'
@@ -424,28 +414,36 @@ let g:auto_save_postsave_hook  = 'TagsGenerate'
 " Tags
 NeoBundle 'szw/vim-tags'
 let g:vim_tags_use_vim_dispatch = 1
-let g:vim_tags_auto_generate = 1
+let g:vim_tags_auto_generate    = 1
 
 " Alpaca-Tags
 NeoBundle 'alpaca-tc/alpaca_tags', {
     \ 'depends'  : ['Shougo/vimproc.vim',  'Shougo/unite.vim'],
     \ 'autoload' : {
-    \   'commands'      : ['Tags',  'TagsUpdate',  'TagsSet',  'TagsBundle',  'TagsCleanCache'],
+    \   'commands'      : ['AlpacaTags',  'AlpacaTagsUpdate',  'AlpacaTagsSet',  'AlpacaTagsBundle',  'AlpacaTagsCleanCache'],
     \   'unite_sources' : ['tags']
     \ }
     \ }
+let g:alpaca_tags#config = {
+    \   '_' : '-R --sort=yes',
+    \   'ruby': '--languages=+Ruby',
+    \ }
+
 augroup AlpacaTags
   autocmd!
-  if exists(':Tags')
-    autocmd BufWritePost Gemfile TagsBundle
-    autocmd BufEnter * TagsSet
+  if exists(':AlpacaTags')
+    autocmd BufWritePost Gemfile AlpacaTagsBundle
+    autocmd BufEnter     *       AlpacaTagsSet
 
-    autocmd BufWritePost * TagsUpdate
+    autocmd BufWritePost *       AlpacaTagsUpdate
   endif
 augroup END
 
 " DelimitMate
 NeoBundle 'Raimondi/delimitMate'
+
+" RSpec output
+NeoBundle 'glidenote/rspec-result-syntax'
 
 " QuickRun
 NeoBundle 'thinca/vim-quickrun'
@@ -454,31 +452,23 @@ let g:quickrun_config['split']                     = 'vertical'
 let g:quickrun_config['close_on_empty']            = 1
 let g:quickrun_config['runner']                    = 'vimproc'
 let g:quickrun_config['runner/vimproc/updatetime'] = 40
-
 let g:quickrun_config['ruby.rspec'] = {
-      \ 'command' :  'rspec',
-      \ 'cmdopt'  :  'bundle exec',
-      \ 'exec'    :  '%o %c --color --tty -cfd %s',
+      \ 'command'                  : 'rspec',
+      \ 'cmdopt'                   : '-cfd',
+      \ 'args'                     : "%{line('.')}",
+      \ 'exec'                     : ['bundle exec %c %o %s:%a'],
+      \ 'outputter/buffer/filetype': 'rspec-result',
+      \ 'filetype'                 : 'rspec-result'
       \ }
-
-fun! QRunRspecCurrentLine()
-  let line = line(".")
-  exe ":QuickRun '-l " . line . "'"
-endfun
 
 augroup RSpec
   autocmd!
   autocmd BufWinEnter,BufNewFile *_spec.rb set filetype=ruby.rspec
-  autocmd BufWinEnter,BufNewFile *_spec.rb nnoremap <Leader>l :call QRunRspecCurrentLine()<CR>
-augroup END
+augroup END 
 
 set splitright
 
-augroup quickrun
-  autocmd!
-  autocmd FileType quickrun AnsiEsc
-augroup END
-
+nnoremap <Leader>r :QuickRun<CR>
 
 " Switch
 NeoBundle 'AndrewRadev/switch.vim'
@@ -611,6 +601,17 @@ NeoBundleLazy 'lambdalisue/vim-pyenv', {
       \   'filetypes': [ 'python', 'python3'],
       \ }}
 
+" Surround
+NeoBundle 'vim-scripts/surround.vim'
+nmap ,( csw(
+nmap ,) csw)
+nmap ,{ csw{
+nmap ,} csw}
+nmap ,[ csw[
+nmap ,] csw]
+nmap ,' csw'
+nmap ," csw"
+
 call neobundle#end()
 
 filetype plugin indent on
@@ -713,6 +714,12 @@ nnoremap <space> za
 set nonumber
 set relativenumber
 
+" ClipBoard
+set clipboard=unnamed
+
+" Show title
+set title
+
 " Maps
 nmap - dd
 nmap t viw
@@ -735,6 +742,6 @@ nnoremap <leader>sv :source $MYVIMRC<CR>
 
 nmap H 0
 nmap L $
-nmap J G
-nmap K gg
+nmap J <C-D>
+nmap K <C-U>
 nmap , :

@@ -209,6 +209,9 @@ NeoBundle 'scrooloose/nerdtree'
 let NERDSpaceDelims    = 1
 let NERDShutUp         = 1
 let NERDTreeShowHidden = 1
+" set autochdir
+" let NERDTreeChDirMode  = 2
+" nnoremap <leader>n :NERDTree .<CR>
 nnoremap <Leader>n :NERDTreeToggle<CR>
 
 " Show NERDTree if No filename
@@ -227,7 +230,7 @@ set statusline+=%{SyntasticStatuslineFlag()}
 set statusline+=%*
 
 let g:syntastic_always_populate_loc_list = 1
-let g:syntastic_auto_loc_list            = 1
+let g:syntastic_auto_loc_list            = 0
 let g:syntastic_check_on_open            = 1
 let g:syntastic_check_on_wq              = 1
 let g:syntastic_mode_map                 = { 'mode': 'passive', 'active_filetypes': ['ruby']}
@@ -461,10 +464,19 @@ let g:quickrun_config['ruby.rspec'] = {
       \ 'filetype'                 : 'rspec-result'
       \ }
 
+let g:quickrun_config['ruby'] = {
+      \ 'command'                  : 'rspec',
+      \ 'cmdopt'                   : '-cfd',
+      \ 'args'                     : "%{line('.')}",
+      \ 'exec'                     : ['%c %o %s:%a'],
+      \ 'outputter/buffer/filetype': 'rspec-result',
+      \ 'filetype'                 : 'rspec-result'
+      \ }
+
 augroup RSpec
   autocmd!
   autocmd BufWinEnter,BufNewFile *_spec.rb set filetype=ruby.rspec
-augroup END 
+augroup END
 
 set splitright
 
@@ -517,7 +529,7 @@ NeoBundle 'Keithbsmiley/rspec.vim'
 map <Leader>c :call RunCurrentSpecFile()<CR>
 map <Leader>s :call RunNearestSpec()<CR>
 map <Leader>l :call RunLastSpec()<CR>
-map <Leader>A :call RunAllSpecs()<CR>
+map <Leader>a :call RunAllSpecs()<CR>
 
 NeoBundleLazy 'thoughtbot/vim-rspec', {
       \ 'depends'  : 'tpope/vim-dispatch',
@@ -528,37 +540,20 @@ function! s:bundle.hooks.on_source(bundle)
   let g:rspec_command = 'Dispatch bundle exec rspec -cfd {spec}'
 endfunction
 
+" Bundler
+NeoBundle 'tpope/vim-bundler'
 " Ruby
-NeoBundle 'vim-ruby/vim-ruby'
-let ruby_operators = 1
-let ruby_space_errors = 1
-let ruby_fold = 1
-let ruby_spellcheck_strings = 1
-" When Code Volume Grows
-" set foldlevel=1
-" set foldnestmax=2
+" NeoBundle 'vim-ruby/vim-ruby'
+" let ruby_operators = 1
+" let ruby_space_errors = 1
+" let ruby_fold = 1
+" let ruby_spellcheck_strings = 1
 
-" augroup foldmethod-syntax
-  " autocmd!
-  " autocmd InsertEnter * if &l:foldmethod ==# 'syntax'
-  " \                   |   setlocal foldmethod=manual
-  " \                   | endif
-  " autocmd InsertLeave * if &l:foldmethod ==# 'manual'
-  " \                   |   setlocal foldmethod=syntax
-  " \                   | endif
-" augroup END
+set foldenable
+set foldmethod=syntax
 
-" set foldenable
-" set foldmethod=syntax
-
-" autocmd InsertEnter * if !exists('w:last_fdm')
-            " \| let w:last_fdm=&foldmethod
-            " \| setlocal foldmethod=manual
-            " \| endif
-" autocmd InsertLeave,WinLeave * if exists('w:last_fdm')
-            " \| let &l:foldmethod=w:last_fdm
-            " \| unlet w:last_fdm
-            " \| endif
+" Ruby fold
+NeoBundle 'bruno-/vim-ruby-fold'
 
 " Rails
 NeoBundle 'tpope/vim-rails'
@@ -654,7 +649,7 @@ set ruler
 set display=uhex
 
 " Keep 15 lines from cursor
-set scrolloff=15
+set scrolloff=26
 
 " Virtual Edit
 set virtualedit=block
@@ -706,8 +701,8 @@ augroup file_type
 augroup END
 
 " Code Folding
-autocmd FileType ruby   setlocal foldmethod=syntax
-autocmd FileType python setlocal foldmethod=indent
+" autocmd FileType ruby   setlocal foldmethod=syntax
+" autocmd FileType python setlocal foldmethod=indent
 nnoremap <space> za
 
 " Relative Number

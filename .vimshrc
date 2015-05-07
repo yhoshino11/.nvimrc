@@ -1,4 +1,4 @@
-let $PATH='$HOME/.rbenv/bin:$HOME/.rbenv/shims:'.$PATH
+let $PATH='/Users/yuhoshino/.rbenv/shims:/Users/yuhoshino/.rbenv/bin:'.$PATH
 alias be='bundle exec'
 alias md='mkdir -p'
 alias ll='ls -laFh'
